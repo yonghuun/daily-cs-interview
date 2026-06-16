@@ -1,0 +1,23 @@
+[
+  {
+    "name": "gyoogle-tech-interview",
+    "url": "https://github.com/gyoogle/tech-interview-for-developer.git",
+    "homepage": "https://github.com/gyoogle/tech-interview-for-developer",
+    "branch": "master",
+    "license": "MIT"
+  },
+  {
+    "name": "devsquad-2023-cs-study",
+    "url": "https://github.com/devSquad-study/2023-CS-Study.git",
+    "homepage": "https://github.com/devSquad-study/2023-CS-Study",
+    "branch": "main",
+    "license": "MIT"
+  },
+  {
+    "name": "ksundong-backend-interview",
+    "url": "https://github.com/ksundong/backend-interview-question.git",
+    "homepage": "https://github.com/ksundong/backend-interview-question",
+    "branch": "master",
+    "license": "CC BY-NC-SA"
+  }
+]
