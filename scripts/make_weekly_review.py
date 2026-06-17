@@ -39,20 +39,29 @@ def build_review(entries: list[dict[str, str]], start: date, end: date) -> str:
     weekly.sort(key=lambda entry: (entry["date"], entry["category"], entry["title"]))
 
     if not weekly:
-        questions = "- 이번 주 기록된 학습 노트가 없습니다."
+        cs_questions = "- 이번 주 기록된 CS 학습 노트가 없습니다."
+        spring_topics = "- 이번 주 기록된 Spring 학습 노트가 없습니다."
         categories = "- 기록 없음"
     else:
-        questions = "\n".join(
+        cs_questions = "\n".join(
             f"- {entry['date']} `{entry['category']}` {entry['title']}" for entry in weekly
         )
+        spring_entries = [entry for entry in weekly if entry.get("spring_title")]
+        spring_topics = "\n".join(
+            f"- {entry['date']} {entry['spring_title']}" for entry in spring_entries
+        ) if spring_entries else "- 이번 주 기록된 Spring 학습 노트가 없습니다."
         counts = Counter(entry["category"] for entry in weekly)
         categories = "\n".join(f"- `{category}`: {count}개" for category, count in sorted(counts.items()))
 
-    return f"""# {start.isoformat()} ~ {end.isoformat()} CS/면접 주간 리뷰
+    return f"""# {start.isoformat()} ~ {end.isoformat()} CS/Spring 면접 주간 리뷰
 
-## 이번 주 질문
+## 이번 주 CS 질문
 
-{questions}
+{cs_questions}
+
+## 이번 주 Spring 백엔드 주제
+
+{spring_topics}
 
 ## 카테고리 분포
 
@@ -91,4 +100,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
