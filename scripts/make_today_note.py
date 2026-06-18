@@ -13,7 +13,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MY_MATERIALS_DIR = ROOT / "my_materials"
-REFERENCE_REPOS_DIR = ROOT / "reference_repos"
+REFERENCES_DIR = ROOT / "references"
+REFERENCE_REPOS_DIR = REFERENCES_DIR / "external"
+SPRING_REFERENCES_DIR = REFERENCES_DIR / "spring"
 DAILY_NOTES_DIR = ROOT / "daily_notes"
 STUDY_STATE_DIR = ROOT / "study_state"
 STUDIED_ITEMS_FILE = STUDY_STATE_DIR / "studied_items.json"
@@ -97,7 +99,7 @@ class StudyItem:
 
     @property
     def key(self) -> str:
-        raw = f"{self.source.as_posix()}\n{self.title}\n{self.body}"
+        raw = f"{source_identity(self.source)}\n{self.title}\n{self.body}"
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 
@@ -591,6 +593,14 @@ def infer_category(path: Path) -> str:
     return "general"
 
 
+def source_identity(path: Path) -> str:
+    try:
+        relative = path.relative_to(REFERENCE_REPOS_DIR)
+    except ValueError:
+        return path.as_posix()
+    return (ROOT / "reference_repos" / relative).as_posix()
+
+
 def load_reference_repos() -> dict[str, dict[str, str]]:
     if not REFERENCE_REPOS_FILE.exists():
         return {}
@@ -742,7 +752,7 @@ def save_study_log(entries: list[dict[str, str]]) -> None:
 def recent_study_sources(limit: int = 7) -> set[str]:
     entries = load_study_log()
     return {
-        source
+        source_identity((ROOT / source).resolve())
         for source in (entry.get("source", "") for entry in entries[-limit:])
         if source
     }
@@ -754,7 +764,7 @@ def choose_item(items: list[StudyItem], used: list[str]) -> StudyItem:
     fresh_source_items = [
         item
         for item in unused
-        if item.source.relative_to(ROOT).as_posix() not in recent_sources
+        if source_identity(item.source) not in recent_sources
     ]
     if fresh_source_items:
         return fresh_source_items[0]
