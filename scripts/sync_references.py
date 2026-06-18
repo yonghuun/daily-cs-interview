@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_FILE = ROOT / "reference_repos.json"
 REFERENCE_REPOS_CACHE_DIR = ROOT / "reference_repos"
-REFERENCE_SNAPSHOT_DIR = ROOT / "references" / "external"
+REFERENCE_SNAPSHOT_DIR = ROOT / "references" / "sources"
 
 
 def run(command: list[str], cwd: Path | None = None) -> None:

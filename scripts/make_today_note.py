@@ -14,8 +14,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MY_MATERIALS_DIR = ROOT / "my_materials"
 REFERENCES_DIR = ROOT / "references"
-REFERENCE_REPOS_DIR = REFERENCES_DIR / "external"
-SPRING_REFERENCES_DIR = REFERENCES_DIR / "spring"
+CURATED_REFERENCES_DIR = REFERENCES_DIR / "curated"
+REFERENCE_SOURCES_DIR = REFERENCES_DIR / "sources"
 DAILY_NOTES_DIR = ROOT / "daily_notes"
 STUDY_STATE_DIR = ROOT / "study_state"
 STUDIED_ITEMS_FILE = STUDY_STATE_DIR / "studied_items.json"
@@ -595,7 +595,7 @@ def infer_category(path: Path) -> str:
 
 def source_identity(path: Path) -> str:
     try:
-        relative = path.relative_to(REFERENCE_REPOS_DIR)
+        relative = path.relative_to(REFERENCE_SOURCES_DIR)
     except ValueError:
         return path.as_posix()
     return (ROOT / "reference_repos" / relative).as_posix()
@@ -610,7 +610,7 @@ def load_reference_repos() -> dict[str, dict[str, str]]:
 
 def build_github_url(path: Path, repos: dict[str, dict[str, str]]) -> str | None:
     try:
-        relative = path.relative_to(REFERENCE_REPOS_DIR)
+        relative = path.relative_to(REFERENCE_SOURCES_DIR)
     except ValueError:
         return None
     if not relative.parts:
@@ -666,8 +666,10 @@ def collect_items(category: str | None = None) -> list[StudyItem]:
     items: list[StudyItem] = []
     reference_repos = load_reference_repos()
     search_roots = [MY_MATERIALS_DIR]
-    if REFERENCE_REPOS_DIR.exists():
-        search_roots.append(REFERENCE_REPOS_DIR)
+    if CURATED_REFERENCES_DIR.exists():
+        search_roots.append(CURATED_REFERENCES_DIR)
+    if REFERENCE_SOURCES_DIR.exists():
+        search_roots.append(REFERENCE_SOURCES_DIR)
 
     for root in search_roots:
         for path in sorted(root.rglob("*")):

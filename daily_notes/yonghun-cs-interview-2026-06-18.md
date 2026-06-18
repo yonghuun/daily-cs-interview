@@ -20,7 +20,7 @@
 >
  매 선택에서 **현재 당장 최적**인 답을 선택해 전체 적합한 결과를 도출하자는 알고리즘 기법
 
-![algorithm greedy 01](../references/external/devsquad-2023-cs-study/Algorithm/img/algorithm_greedy_01.png)
+![algorithm greedy 01](../references/sources/devsquad-2023-cs-study/Algorithm/img/algorithm_greedy_01.png)
 
 그리디 알고리즘을 이용하면, 부분 최적해는 구했지만 전체 선택에서는 오히려 최적이 아닌 경로를 선택하여 전체 문제에서의 최적값은 구하지 못하게 된다.
 

@@ -69,7 +69,7 @@ web
 
 CS 주제는 랜덤이 아니라 정해진 순서로 선택됩니다.
 
-1. `my_materials/`를 먼저 읽고, 그 다음 `references/external/`를 읽습니다.
+1. `my_materials/`를 먼저 읽고, 그 다음 `references/curated/`, `references/sources/` 순서로 읽습니다.
 2. 각 폴더 안의 Markdown/Text 파일은 파일 경로 이름순으로 정렬해서 훑습니다.
 3. 파일 안에서는 Markdown 제목과 질문 라인을 학습 항목으로 뽑습니다.
 4. `study_state/studied_items.json`에 이미 기록된 항목은 건너뜁니다.
@@ -219,12 +219,14 @@ ACID는 원자성, 일관성, 격리성, 지속성을 의미합니다.
 - `gyoogle/tech-interview-for-developer`
 - `devSquad-study/2023-CS-Study`
 - `ksundong/backend-interview-question`
+- `spring-projects/spring-petclinic`
+- `spring-guides/gs-rest-service`
 
-`scripts/sync_references.py`는 참고 레포를 `reference_repos/`에 로컬 Git 캐시로 동기화한 뒤, `.git` 폴더를 제외한 파일 스냅샷을 `references/external/`에 복사합니다. 실제 노트 생성은 Git에 함께 올릴 수 있는 `references/external/`을 기준으로 동작합니다.
+`scripts/sync_references.py`는 참고 레포를 `reference_repos/`에 로컬 Git 캐시로 동기화한 뒤, `.git` 폴더를 제외한 파일 스냅샷을 `references/sources/`에 복사합니다. 직접 정리한 자료는 `references/curated/`에 두고, 원본 출처와 라이선스는 `references/SOURCES.md`에서 관리합니다.
 
 각 저장소의 원문 저작권과 라이선스를 존중해 개인 학습 용도로 사용하세요. 특히 `ksundong/backend-interview-question`은 비영리 조건이 포함된 CC BY-NC-SA 계열로 안내되어 있습니다.
 
-Spring 백엔드 트랙은 필수 커리큘럼을 스크립트 안에 별도로 두고 진행합니다. 추가로 직접 모은 Spring 참고 자료는 `references/spring/`에 둘 수 있습니다. 구현 구조 참고 자료로는 Spring 공식 샘플인 `spring-projects/spring-petclinic`을 참고합니다.
+Spring 백엔드 트랙은 필수 커리큘럼을 스크립트 안에 별도로 두고 진행합니다. 구현 구조 참고 자료로는 Spring 공식 샘플인 `spring-projects/spring-petclinic`을, REST API 기초 흐름은 `spring-guides/gs-rest-service`를 참고합니다. 추가로 직접 모은 Spring 참고 자료는 `references/curated/spring/`에 둘 수 있습니다.
 
 ## Project Structure
 
@@ -233,8 +235,9 @@ Spring 백엔드 트랙은 필수 커리큘럼을 스크립트 안에 별도로 
 ├── daily_notes/          # 날짜별 지식 카드
 ├── my_materials/         # 직접 추가한 학습 자료
 ├── references/           # Git에 함께 올리는 참고 자료 스냅샷
-│   ├── external/         # 외부 참고 레포 파일 스냅샷
-│   └── spring/           # 직접 모은 Spring 참고 자료
+│   ├── curated/          # 직접 정리한 개인 학습 자료
+│   ├── sources/          # 원본 참고 자료 스냅샷
+│   └── SOURCES.md        # 원본 출처와 라이선스
 ├── reference_repos/      # 로컬 Git 동기화 캐시, Git에는 올리지 않음
 ├── scripts/              # 생성/동기화/자동실행 스크립트
 ├── study_state/          # CS/Spring 학습 로그, launchd 로그

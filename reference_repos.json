@@ -19,5 +19,19 @@
     "homepage": "https://github.com/ksundong/backend-interview-question",
     "branch": "master",
     "license": "CC BY-NC-SA"
+  },
+  {
+    "name": "spring-petclinic",
+    "url": "https://github.com/spring-projects/spring-petclinic.git",
+    "homepage": "https://github.com/spring-projects/spring-petclinic",
+    "branch": "main",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "spring-guides-gs-rest-service",
+    "url": "https://github.com/spring-guides/gs-rest-service.git",
+    "homepage": "https://github.com/spring-guides/gs-rest-service",
+    "branch": "main",
+    "license": "Apache-2.0"
   }
 ]
