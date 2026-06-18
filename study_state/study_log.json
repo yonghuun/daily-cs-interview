@@ -18,5 +18,16 @@
     "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_brute_force_search.md",
     "spring_key": "spring-rest-api-basics",
     "spring_title": "REST API 설계 기본"
+  },
+  {
+    "date": "2026-06-18",
+    "key": "47eadc4a032d1b97",
+    "title": "그리디 알고리즘(Greedy Algorithm) 💸",
+    "category": "algorithm",
+    "source": "reference_repos/devsquad-2023-cs-study/Algorithm/algorithm_greedy.md",
+    "note": "daily_notes/yonghun-cs-interview-2026-06-18.md",
+    "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_greedy.md",
+    "spring_key": "spring-layered-architecture",
+    "spring_title": "Controller-Service-Repository 계층 분리"
   }
 ]
