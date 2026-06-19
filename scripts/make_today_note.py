@@ -925,6 +925,15 @@ def definition_terms(text: str, limit: int = 5) -> list[str]:
 
 def build_summary_section(item: StudyItem) -> str:
     lowered = f"{item.title} {strip_markdown(item.body)}".lower()
+    if is_hash_topic(item):
+        return "\n".join(
+            [
+                "- 해시는 임의 길이의 입력을 고정 길이의 해시값으로 매핑하는 방식입니다.",
+                "- 해시 테이블은 해시 함수를 이용해 key가 저장될 버킷 위치를 계산하므로 평균적으로 검색, 삽입, 삭제가 `O(1)`에 가깝습니다.",
+                "- 서로 다른 key가 같은 버킷에 매핑되는 해시 충돌은 피할 수 없으므로, 체이닝이나 개방 주소법 같은 충돌 해결 전략이 필요합니다.",
+                "- 데이터가 많아져 Load Factor가 높아지면 충돌 가능성이 커지므로, 해시 테이블은 보통 재해싱을 통해 버킷 크기를 늘립니다.",
+            ]
+        )
     if "greedy" in lowered or "그리디" in lowered or "탐욕" in lowered:
         return "\n".join(
             [
@@ -970,25 +979,39 @@ def build_summary_section(item: StudyItem) -> str:
 
 def build_interview_points(item: StudyItem) -> str:
     lowered = f"{item.title} {strip_markdown(item.body)}".lower()
-    if "greedy" in lowered or "그리디" in lowered or "탐욕" in lowered:
-        points = [
-            "그리디 알고리즘: 매 순간의 최선 선택으로 전체 해답을 구성하는 방식이라고 설명할 수 있어야 합니다.",
-            "핵심 키워드: 탐욕 선택 속성, 최적 부분 구조, 정렬, 반례, 시간 복잡도",
-            "완전탐색/동적 계획법과 비교해 탐색 범위를 줄이는 대신 정당성 증명이 필요하다는 점을 말할 수 있어야 합니다.",
-            "회의실 배정, 거스름돈처럼 어떤 선택 기준이 전체 최적해로 이어지는지 예시로 설명하면 좋습니다.",
+    if is_hash_topic(item):
+        rows = [
+            ("정의", "임의 길이 입력을 고정 길이 해시값으로 매핑"),
+            ("동작 원리", "key, hashCode, 버킷, 인덱스 계산"),
+            ("장점", "평균 `O(1)` 조회, 빠른 중복 확인, key 기반 접근"),
+            ("단점", "해시 충돌, 순서 미보장, 최악 성능 저하"),
+            ("충돌 해결", "체이닝, 개방 주소법, 선형 탐사, 이중 해싱"),
+            ("확장 과정", "Load Factor, threshold, resize, rehashing"),
+            ("실무 활용", "`HashMap`, `HashSet`, 캐시, 중복 제거, 보안 해시"),
         ]
-        return "\n".join(f"- {point}" for point in points)
+        return markdown_table(("질문 포인트", "핵심 키워드"), rows)
+    if "greedy" in lowered or "그리디" in lowered or "탐욕" in lowered:
+        rows = [
+            ("정의", "매 순간의 최선 선택으로 전체 해답을 구성하는 방식"),
+            ("동작 원리", "현재 선택 기준, 적절성 검사, 해답 검사"),
+            ("장점", "조건이 맞으면 빠르고 구현이 단순함"),
+            ("단점", "탐욕 선택이 전체 최적해를 보장하지 않을 수 있음"),
+            ("비교 개념", "완전탐색, 동적 계획법, 반례 검증"),
+        ]
+        return markdown_table(("질문 포인트", "핵심 키워드"), rows)
 
     keywords = extract_keywords(item.title, item.body, limit=5)
     if not keywords:
         keywords = ["정의", "동작 방식", "장단점", "실무 적용", "주의점"]
-    points = [
-        f"{item.title}: 무엇인지 한 문장으로 설명할 수 있어야 합니다.",
-        f"핵심 키워드: {', '.join(keywords)}",
-        "비슷한 개념과 비교했을 때 어떤 차이가 있는지 정리해두면 좋습니다.",
-        "실무에서 성능, 안정성, 확장성 중 무엇에 영향을 주는지 연결해서 생각해봅니다.",
+    rows = [
+        ("정의", f"{item.title}를 한 문장으로 설명"),
+        ("동작 원리", ", ".join(keywords[:4])),
+        ("장점", "무엇을 더 빠르게, 단순하게, 안정적으로 만드는지 설명"),
+        ("단점", "성능, 복잡도, 운영 부담, 예외 상황 설명"),
+        ("비교 개념", "비슷한 개념과 책임, 사용 시점, 비용 비교"),
+        ("실무 활용", "Java/Spring 백엔드에서의 사용 사례와 주의점 연결"),
     ]
-    return "\n".join(f"- {point}" for point in points)
+    return markdown_table(("질문 포인트", "핵심 키워드"), rows)
 
 
 def is_likely_interview_question(text: str) -> bool:
@@ -998,10 +1021,21 @@ def is_likely_interview_question(text: str) -> bool:
         return False
     if ":" in text and not re.search(r"(차이|설명|무엇|왜|어떻게|이유|장단점|특징)", text):
         return False
-    return bool(re.search(r"(\?|설명|차이|무엇|왜|어떻게|이유|장단점|특징)", text))
+    return bool(re.search(r"(\?|설명|차이|무엇|왜|어떻게|이유|장단점)", text))
 
 
 def build_related_questions(item: StudyItem) -> str:
+    if is_hash_topic(item):
+        rows = [
+            ("해시를 한 문장으로 설명해주세요.", "입력 데이터를 해시 함수로 고정 길이 값에 매핑하는 방식"),
+            ("해시 테이블의 조회가 빠른 이유는 무엇인가요?", "key를 비교 탐색하지 않고 버킷 위치를 바로 계산하기 때문"),
+            ("해시 충돌은 왜 발생하나요?", "입력 공간은 크고 버킷 수는 제한되어 있기 때문"),
+            ("체이닝과 개방 주소법의 차이는 무엇인가요?", "같은 버킷에 모아두는 방식과 다른 빈 버킷을 찾는 방식의 차이"),
+            ("Load Factor와 재해싱은 무엇인가요?", "테이블이 얼마나 찼는지 나타내는 비율과 버킷을 늘려 다시 배치하는 과정"),
+            ("Java `HashMap`은 충돌을 어떻게 처리하나요?", "체이닝 기반으로 처리하고, 충돌이 심한 버킷은 트리화할 수 있음"),
+        ]
+        return markdown_table(("질문", "핵심 답변 방향"), rows)
+
     explicit: list[str] = []
     text = body_without_code(item.body)
     for line in text.splitlines():
@@ -1025,7 +1059,8 @@ def build_related_questions(item: StudyItem) -> str:
     for question in questions:
         if question not in deduped:
             deduped.append(question)
-    return "\n".join(f"- {question}" for question in deduped[:6])
+    rows = [(question, infer_question_direction(question)) for question in deduped[:6]]
+    return markdown_table(("질문", "핵심 답변 방향"), rows)
 
 
 def concept_name(title: str) -> str:
@@ -1033,9 +1068,41 @@ def concept_name(title: str) -> str:
     return name
 
 
+def is_hash_topic(item: StudyItem) -> bool:
+    text = f"{item.title} {strip_markdown(item.body)}".lower()
+    return "hash" in text or "해시" in text
+
+
+def display_title(item: StudyItem) -> str:
+    if is_hash_topic(item) and re.search(r"hash\s*란|해시", item.title, flags=re.IGNORECASE):
+        return "해시(Hash)"
+    return item.title
+
+
 def build_interview_answer_examples(item: StudyItem) -> str:
     title = concept_name(item.title)
     lowered = f"{title} {strip_markdown(item.body)}".lower()
+
+    if is_hash_topic(item):
+        return """### Q. 해시를 한 문장으로 설명해주세요.
+
+해시는 임의 길이의 입력 데이터를 해시 함수를 통해 고정 길이의 해시값으로 매핑하는 방식입니다. 자료구조에서는 key를 버킷 위치로 바꿔 빠르게 데이터를 찾기 위해 사용하고, 보안에서는 원문을 직접 저장하지 않거나 무결성을 검증하기 위해 사용합니다.
+
+### Q. 해시 테이블의 조회가 평균적으로 빠른 이유는 무엇인가요?
+
+해시 테이블은 key를 처음부터 순차 비교하지 않고, 해시 함수를 통해 key가 저장될 버킷 위치를 계산합니다. 해시값이 고르게 분포하고 충돌이 적다면 원하는 위치에 거의 바로 접근할 수 있기 때문에 검색, 삽입, 삭제가 평균적으로 `O(1)`에 가깝게 동작합니다.
+
+### Q. 해시 충돌은 왜 발생하고 어떻게 해결하나요?
+
+해시 충돌은 서로 다른 key가 같은 해시값이나 같은 버킷 위치로 매핑될 때 발생합니다. 가능한 key의 수는 매우 크지만 실제 버킷 수는 제한되어 있기 때문에 충돌은 피할 수 없습니다. 대표적인 해결 방법은 같은 버킷에 여러 값을 연결하는 체이닝과, 충돌 시 다른 빈 버킷을 찾는 개방 주소법입니다.
+
+### Q. Load Factor와 재해싱은 무엇인가요?
+
+Load Factor는 해시 테이블의 버킷이 얼마나 채워졌는지를 나타내는 비율입니다. 데이터가 계속 추가되어 Load Factor가 높아지면 충돌 가능성이 커지고 성능이 떨어질 수 있습니다. 그래서 일정 기준을 넘으면 버킷 배열을 늘리고 기존 key들을 새 위치에 다시 배치하는데, 이를 재해싱이라고 합니다.
+
+### Q. Java `HashMap`은 충돌을 어떻게 처리하나요?
+
+Java `HashMap`은 기본적으로 같은 버킷에 들어온 엔트리를 연결해서 관리하는 체이닝 방식을 사용합니다. Java 8 이후에는 특정 조건에서 버킷 내부 구조를 연결 리스트에서 트리로 바꿔 최악의 탐색 성능을 완화합니다."""
 
     if "greedy" in lowered or "그리디" in lowered or "탐욕" in lowered:
         return f"""### {title}를 한 문장으로 설명해주세요.
@@ -1115,18 +1182,430 @@ def bullet_lines(lines: tuple[str, ...]) -> str:
     return "\n".join(f"- {line}" for line in lines)
 
 
-def build_spring_topic_section(topic: SpringTopic) -> str:
-    petclinic = ""
-    if topic.petclinic_hint:
-        petclinic = f"""
-### PetClinic 참고 포인트
+def table_cell(text: str) -> str:
+    return text.replace("|", "\\|").replace("\n", "<br>")
 
-- {topic.petclinic_hint}
-"""
-    code_examples = ""
+
+def markdown_table(headers: tuple[str, ...], rows: list[tuple[str, ...]]) -> str:
+    header = "| " + " | ".join(headers) + " |"
+    separator = "| " + " | ".join("---" for _ in headers) + " |"
+    body = ["| " + " | ".join(table_cell(cell) for cell in row) + " |" for row in rows]
+    return "\n".join([header, separator, *body])
+
+
+SPRING_OPERATION_STEPS: dict[str, tuple[str, ...]] = {
+    "spring-rest-api-basics": (
+        "클라이언트가 HTTP 요청을 보냅니다.",
+        "DispatcherServlet이 요청을 받고 HandlerMapping을 통해 Controller를 찾습니다.",
+        "Controller는 요청 DTO를 바인딩하고 검증한 뒤 Service에 유스케이스 처리를 위임합니다.",
+        "Service는 비즈니스 규칙을 처리하고 Repository나 외부 시스템과 협력합니다.",
+        "응답 DTO와 HTTP 상태 코드가 클라이언트로 반환됩니다.",
+    ),
+    "spring-layered-architecture": (
+        "Controller가 HTTP 요청과 응답 변환을 담당합니다.",
+        "Service가 하나의 비즈니스 유스케이스와 트랜잭션 경계를 담당합니다.",
+        "Repository가 데이터 접근 세부 사항을 캡슐화합니다.",
+        "각 계층은 바로 아래 계층에만 의존하도록 구성해 변경 전파를 줄입니다.",
+    ),
+    "spring-ioc-di": (
+        "Spring이 설정 정보와 컴포넌트 스캔 결과를 바탕으로 Bean 후보를 찾습니다.",
+        "BeanDefinition을 만들고 어떤 클래스가 어떤 의존성을 필요로 하는지 파악합니다.",
+        "Spring 컨테이너가 Bean 객체를 생성합니다.",
+        "생성자, setter, 필드 등의 주입 지점을 통해 필요한 의존 Bean을 연결합니다.",
+        "초기화 콜백을 수행한 뒤 애플리케이션에서 사용할 수 있는 Bean으로 관리합니다.",
+    ),
+    "spring-mvc-dispatcher-servlet": (
+        "요청이 Servlet Container를 거쳐 DispatcherServlet에 도착합니다.",
+        "HandlerMapping이 요청을 처리할 Controller 메서드를 찾습니다.",
+        "HandlerAdapter가 Controller 메서드를 호출합니다.",
+        "반환값은 ViewResolver 또는 HttpMessageConverter를 통해 응답으로 변환됩니다.",
+        "예외가 발생하면 HandlerExceptionResolver나 ControllerAdvice가 응답을 구성합니다.",
+    ),
+    "spring-validation-exception": (
+        "Controller가 요청 DTO를 바인딩합니다.",
+        "`@Valid` 또는 `@Validated`가 Bean Validation 제약 조건을 검사합니다.",
+        "검증 실패나 비즈니스 예외가 발생하면 예외가 상위로 전파됩니다.",
+        "`@RestControllerAdvice`가 예외 타입별로 HTTP 상태 코드와 에러 응답을 만듭니다.",
+    ),
+    "spring-transaction": (
+        "클라이언트 코드가 `@Transactional`이 붙은 Service 메서드를 호출합니다.",
+        "Spring AOP 프록시가 호출을 가로채 트랜잭션을 시작합니다.",
+        "Service 로직과 Repository 호출이 같은 트랜잭션 안에서 실행됩니다.",
+        "정상 종료되면 commit하고, 롤백 대상 예외가 발생하면 rollback합니다.",
+    ),
+    "spring-jpa-basic": (
+        "Service가 Repository 메서드를 호출합니다.",
+        "Spring Data JPA가 메서드 이름, JPQL, Querydsl 등의 방식으로 쿼리를 실행합니다.",
+        "EntityManager가 영속성 컨텍스트를 통해 Entity를 관리합니다.",
+        "트랜잭션 종료 시점에 flush와 dirty checking이 수행될 수 있습니다.",
+    ),
+    "spring-security-jwt": (
+        "로그인 성공 시 서버가 Access Token과 Refresh Token을 발급합니다.",
+        "클라이언트는 이후 요청마다 Authorization 헤더에 Bearer 토큰을 담아 보냅니다.",
+        "Spring Security Filter가 토큰 서명, 만료 시간, 권한 클레임을 검증합니다.",
+        "검증 성공 시 Authentication을 만들어 SecurityContext에 저장합니다.",
+        "Controller와 Service는 인증된 사용자와 권한 정보를 바탕으로 요청을 처리합니다.",
+    ),
+}
+
+
+SPRING_COMPONENTS: dict[str, tuple[tuple[str, str], ...]] = {
+    "spring-rest-api-basics": (
+        ("Controller", "HTTP 요청/응답과 라우팅을 담당합니다."),
+        ("DTO", "외부 API 계약과 내부 도메인 모델을 분리합니다."),
+        ("Service", "비즈니스 유스케이스를 처리합니다."),
+        ("Repository", "데이터 접근을 캡슐화합니다."),
+        ("ControllerAdvice", "예외 응답을 일관되게 변환합니다."),
+    ),
+    "spring-layered-architecture": (
+        ("Controller", "입력 검증, 요청 매핑, 응답 변환을 담당합니다."),
+        ("Service", "비즈니스 규칙과 트랜잭션 경계를 담당합니다."),
+        ("Repository", "데이터 저장소 접근을 담당합니다."),
+        ("DTO", "계층 간 전달 데이터와 API 표현을 분리합니다."),
+    ),
+    "spring-ioc-di": (
+        ("Bean", "Spring 컨테이너가 생성하고 관리하는 객체입니다."),
+        ("BeanDefinition", "Bean 생성과 주입에 필요한 메타데이터입니다."),
+        ("BeanFactory", "Bean 생성과 조회를 담당하는 기본 컨테이너입니다."),
+        ("ApplicationContext", "BeanFactory에 환경, 이벤트, 메시지 기능을 더한 컨테이너입니다."),
+        ("Component Scan", "컴포넌트 애노테이션이 붙은 클래스를 Bean 후보로 찾는 과정입니다."),
+    ),
+    "spring-mvc-dispatcher-servlet": (
+        ("DispatcherServlet", "모든 웹 요청의 중앙 진입점입니다."),
+        ("HandlerMapping", "요청을 처리할 핸들러를 찾습니다."),
+        ("HandlerAdapter", "찾은 핸들러를 실제로 호출합니다."),
+        ("ViewResolver", "뷰 이름을 실제 뷰로 해석합니다."),
+        ("HttpMessageConverter", "객체와 JSON 같은 HTTP body를 변환합니다."),
+    ),
+    "spring-validation-exception": (
+        ("Bean Validation", "DTO 제약 조건을 선언적으로 검증합니다."),
+        ("BindingResult", "검증 오류 정보를 담습니다."),
+        ("RestControllerAdvice", "예외를 공통 API 응답으로 변환합니다."),
+        ("ErrorResponse", "클라이언트가 이해할 수 있는 에러 계약입니다."),
+    ),
+    "spring-transaction": (
+        ("TransactionManager", "트랜잭션 시작, commit, rollback을 담당합니다."),
+        ("AOP Proxy", "`@Transactional` 메서드 호출을 감싸 트랜잭션을 적용합니다."),
+        ("Persistence Context", "JPA Entity 변경을 추적합니다."),
+        ("Rollback Rule", "어떤 예외에서 rollback할지 결정합니다."),
+    ),
+    "spring-jpa-basic": (
+        ("JpaRepository", "기본 CRUD, 페이징, 정렬 기능을 제공합니다."),
+        ("EntityManager", "Entity 생명주기와 영속성 컨텍스트를 관리합니다."),
+        ("Persistence Context", "1차 캐시와 변경 감지를 제공합니다."),
+        ("JPQL", "Entity 중심의 객체 지향 쿼리입니다."),
+    ),
+    "spring-security-jwt": (
+        ("SecurityFilterChain", "보안 Filter들의 실행 순서를 정의합니다."),
+        ("Authentication", "인증된 사용자와 권한 정보를 표현합니다."),
+        ("SecurityContext", "현재 요청의 인증 정보를 보관합니다."),
+        ("JwtAuthenticationFilter", "JWT를 검증하고 인증 객체를 만듭니다."),
+        ("UserDetailsService", "사용자 정보를 조회하는 표준 확장 지점입니다."),
+    ),
+}
+
+
+SPRING_CAUTIONS: dict[str, tuple[str, ...]] = {
+    "spring-rest-api-basics": (
+        "URI에 행위를 과하게 넣지 말고 리소스 중심으로 설계합니다.",
+        "Entity를 그대로 응답하지 말고 요청/응답 DTO를 분리합니다.",
+        "성공 응답뿐 아니라 실패 응답 형식도 일관되게 설계합니다.",
+        "목록 API는 처음부터 페이징, 정렬, 검색 조건을 고려합니다.",
+    ),
+    "spring-layered-architecture": (
+        "Controller에 비즈니스 로직이 쌓이지 않도록 합니다.",
+        "Repository에 화면/API 전용 조합 로직을 과하게 넣지 않습니다.",
+        "Service가 너무 많은 유스케이스를 담당하면 책임 분리를 검토합니다.",
+        "계층 분리는 파일 위치가 아니라 변경 이유와 테스트 범위를 나누는 일입니다.",
+    ),
+    "spring-ioc-di": (
+        "필드 주입은 테스트와 불변성 측면에서 되도록 피합니다.",
+        "생성자 파라미터가 많다면 클래스 책임이 과도한지 점검합니다.",
+        "순환 참조는 지연 주입보다 책임 분리로 해결하는 것이 좋습니다.",
+        "인터페이스는 실제 교체 가능성과 테스트 필요성을 기준으로 도입합니다.",
+    ),
+    "spring-mvc-dispatcher-servlet": (
+        "Filter와 Interceptor의 실행 위치를 구분해서 공통 로직을 배치합니다.",
+        "REST API에서는 ViewResolver가 아니라 HttpMessageConverter 흐름을 이해합니다.",
+        "요청/응답 로깅 시 개인정보와 인증 토큰이 남지 않게 주의합니다.",
+        "Controller가 화면/응답 변환 이상의 비즈니스 판단을 직접 하지 않게 합니다.",
+    ),
+    "spring-validation-exception": (
+        "검증 실패와 비즈니스 예외를 같은 의미로 처리하지 않습니다.",
+        "에러 응답에 스택트레이스나 민감 정보를 노출하지 않습니다.",
+        "HTTP 상태 코드와 비즈니스 에러 코드를 일관되게 분리합니다.",
+        "클라이언트가 후속 조치를 할 수 있는 메시지와 코드를 제공합니다.",
+    ),
+    "spring-transaction": (
+        "self-invocation에서는 프록시 기반 트랜잭션이 적용되지 않을 수 있습니다.",
+        "트랜잭션 안에서 외부 API 호출을 오래 잡고 있지 않도록 합니다.",
+        "checked exception은 기본 rollback 대상이 아니므로 정책을 확인합니다.",
+        "읽기 전용 조회는 `readOnly = true`를 검토합니다.",
+    ),
+    "spring-jpa-basic": (
+        "Entity를 API 응답으로 직접 노출하지 않습니다.",
+        "N+1 문제가 생기지 않도록 fetch 전략과 조회 쿼리를 확인합니다.",
+        "영속성 컨텍스트 범위 밖에서 지연 로딩을 접근하면 예외가 발생할 수 있습니다.",
+        "복잡한 동적 조회는 메서드 이름 쿼리보다 명시적 쿼리 도구를 검토합니다.",
+    ),
+    "spring-security-jwt": (
+        "JWT payload는 암호화가 아니므로 민감 정보를 넣지 않습니다.",
+        "Access Token 만료와 Refresh Token 폐기 전략을 함께 설계합니다.",
+        "토큰 탈취 상황에서 로그아웃과 재발급 정책을 고려합니다.",
+        "인증 실패와 권한 부족을 401/403으로 구분합니다.",
+    ),
+}
+
+
+SPRING_RELATED: dict[str, tuple[tuple[str, str], ...]] = {
+    "spring-rest-api-basics": (
+        ("HTTP Method", "자원에 대한 행위를 표현합니다."),
+        ("HTTP Status Code", "요청 처리 결과를 표준 방식으로 전달합니다."),
+        ("DTO", "외부 API 계약을 안정적으로 유지합니다."),
+        ("Validation", "잘못된 입력을 Controller 경계에서 차단합니다."),
+        ("ControllerAdvice", "공통 예외 응답을 구성합니다."),
+    ),
+    "spring-layered-architecture": (
+        ("DTO", "계층 간 데이터 표현을 분리합니다."),
+        ("Transaction Boundary", "Service 유스케이스의 작업 단위를 정합니다."),
+        ("Slice Test", "계층별 책임을 독립적으로 검증합니다."),
+        ("Domain Model", "비즈니스 규칙이 위치할 대상을 판단합니다."),
+    ),
+    "spring-ioc-di": (
+        ("Bean Scope", "Bean이 언제 생성되고 얼마나 유지되는지 이해하기 위해 필요합니다."),
+        ("Component Scan", "Spring이 어떤 클래스를 Bean으로 등록하는지 이해하기 위해 필요합니다."),
+        ("`@Autowired`", "Spring의 의존성 주입 지점을 이해하기 위해 필요합니다."),
+        ("`@RequiredArgsConstructor`", "생성자 주입을 간결하게 작성할 때 자주 사용합니다."),
+        ("AOP Proxy", "Bean으로 등록되어야 트랜잭션 같은 부가 기능 적용이 가능하다는 점과 연결됩니다."),
+    ),
+    "spring-mvc-dispatcher-servlet": (
+        ("Filter", "Servlet 레벨의 공통 처리를 담당합니다."),
+        ("Interceptor", "Spring MVC 핸들러 호출 전후 처리를 담당합니다."),
+        ("ArgumentResolver", "Controller 파라미터 바인딩을 확장합니다."),
+        ("MessageConverter", "JSON 요청/응답 변환을 담당합니다."),
+    ),
+    "spring-validation-exception": (
+        ("Bean Validation", "DTO 필드 검증을 선언적으로 표현합니다."),
+        ("Error Code", "클라이언트와 운영자가 실패 원인을 식별합니다."),
+        ("HTTP Status", "프로토콜 수준의 실패 의미를 전달합니다."),
+        ("Problem Details", "표준화된 API 에러 응답 형식으로 확장할 수 있습니다."),
+    ),
+    "spring-transaction": (
+        ("ACID", "트랜잭션이 보장해야 하는 성질입니다."),
+        ("Isolation Level", "동시성 상황에서 읽기 일관성을 결정합니다."),
+        ("AOP Proxy", "`@Transactional` 동작 방식을 이해하는 핵심입니다."),
+        ("Persistence Context", "JPA 변경 감지와 flush 시점을 이해하는 데 필요합니다."),
+        ("Propagation", "트랜잭션 전파 방식을 결정합니다."),
+    ),
+    "spring-jpa-basic": (
+        ("Entity", "DB 테이블과 매핑되는 도메인 객체입니다."),
+        ("Persistence Context", "JPA의 1차 캐시와 변경 감지를 제공합니다."),
+        ("Fetch Join", "N+1 문제를 해결할 때 자주 사용합니다."),
+        ("EntityGraph", "조회 시점의 fetch 계획을 선언적으로 조정합니다."),
+        ("Querydsl", "복잡한 동적 쿼리를 타입 안정성 있게 작성합니다."),
+    ),
+    "spring-security-jwt": (
+        ("Authentication", "사용자가 누구인지 확인한 결과입니다."),
+        ("Authorization", "사용자가 무엇을 할 수 있는지 판단합니다."),
+        ("SecurityContext", "현재 요청의 인증 정보를 저장합니다."),
+        ("Refresh Token", "Access Token 재발급 정책과 연결됩니다."),
+        ("CORS / CSRF", "브라우저 보안과 API 인증 설계에서 함께 고려합니다."),
+    ),
+}
+
+
+SPRING_FALLBACK_CODE: dict[str, str] = {
+    "spring-ioc-di": """```java
+import org.springframework.stereotype.Service;
+
+@Service
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+
+    public OrderService(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+}
+```""",
+    "spring-mvc-dispatcher-servlet": """```java
+@RestController
+@RequestMapping("/api/orders")
+class OrderController {
+
+    @GetMapping("/{orderId}")
+    OrderResponse findOrder(@PathVariable Long orderId) {
+        return new OrderResponse(orderId);
+    }
+}
+```""",
+    "spring-validation-exception": """```java
+record CreateUserRequest(
+        @NotBlank String name,
+        @Email String email
+) {
+}
+
+@PostMapping("/users")
+UserResponse create(@Valid @RequestBody CreateUserRequest request) {
+    return userService.create(request);
+}
+```""",
+    "spring-transaction": """```java
+@Service
+public class OrderService {
+
+    @Transactional
+    public Long createOrder(CreateOrderRequest request) {
+        Order order = orderRepository.save(request.toEntity());
+        paymentHistoryRepository.save(PaymentHistory.from(order));
+        return order.getId();
+    }
+}
+```""",
+    "spring-jpa-basic": """```java
+interface OwnerRepository extends JpaRepository<Owner, Long> {
+    List<Owner> findByLastNameContaining(String lastName);
+}
+```""",
+    "spring-security-jwt": """```java
+String token = authorizationHeader.substring("Bearer ".length());
+Authentication authentication = jwtProvider.getAuthentication(token);
+SecurityContextHolder.getContext().setAuthentication(authentication);
+```""",
+}
+
+
+def build_spring_operation(topic: SpringTopic) -> str:
+    steps = SPRING_OPERATION_STEPS.get(topic.key)
+    if not steps:
+        steps = topic.details
+    return "\n".join(f"{index}. {step}" for index, step in enumerate(steps, start=1))
+
+
+def build_spring_components(topic: SpringTopic) -> list[tuple[str, str]]:
+    rows = list(SPRING_COMPONENTS.get(topic.key, ()))
+    if rows:
+        return rows
+    return [
+        ("Spring Bean", "Spring 컨테이너가 생성하고 관리하는 객체입니다."),
+        ("Service", "비즈니스 유스케이스를 처리합니다."),
+        ("Repository", "데이터 접근을 담당합니다."),
+    ]
+
+
+def build_spring_implementation_rows(topic: SpringTopic) -> list[tuple[str, str, str]]:
+    rows: list[tuple[str, str, str]] = []
+    for line in topic.implementation:
+        if "는 " in line:
+            situation, rest = line.split("는 ", maxsplit=1)
+            rows.append((situation.strip(), rest.strip().rstrip("."), "책임과 변경 범위를 명확히 하기 위해서입니다."))
+        else:
+            rows.append(("실무 적용", line.rstrip("."), "일관된 구조와 유지보수성을 높이기 위해서입니다."))
+    return rows[:5]
+
+
+def build_spring_cautions(topic: SpringTopic) -> tuple[str, ...]:
+    return SPRING_CAUTIONS.get(
+        topic.key,
+        (
+            "기능 사용법만 외우지 말고 동작 원리와 적용 조건을 함께 확인합니다.",
+            "실무에서는 테스트 가능성, 변경 가능성, 장애 상황을 함께 고려합니다.",
+            "공통 설정은 팀 컨벤션과 운영 환경에 맞게 일관되게 관리합니다.",
+        ),
+    )
+
+
+def build_spring_code_examples(topic: SpringTopic) -> str:
     if topic.code_examples:
-        code_examples = "\n## Spring 코드 예시\n\n" + "\n".join(topic.code_examples).rstrip() + "\n"
-    return f"""## 오늘의 Spring 백엔드 지식
+        return "\n\n".join(example.strip() for example in topic.code_examples)
+    return SPRING_FALLBACK_CODE.get(topic.key, "이 주제는 코드보다 동작 원리와 설계 기준을 중심으로 정리합니다.")
+
+
+def build_spring_tail_questions(topic: SpringTopic) -> list[tuple[str, str]]:
+    rows: list[tuple[str, str]] = []
+    for question in topic.questions:
+        rows.append((question, infer_question_direction(question)))
+    return rows
+
+
+def infer_question_direction(question: str) -> str:
+    if "차이" in question:
+        return "책임, 동작 위치, 사용 시점을 기준으로 비교합니다."
+    if "이유" in question or "왜" in question:
+        return "해결하려는 문제와 얻는 장점을 함께 설명합니다."
+    if "어떻게" in question or "흐름" in question:
+        return "처리 순서와 관련 컴포넌트를 단계적으로 설명합니다."
+    if "문제" in question or "단점" in question:
+        return "발생 원인, 영향, 대안을 함께 설명합니다."
+    return "정의, 동작 원리, 실무 주의점을 연결해 답변합니다."
+
+
+def build_spring_answer_examples(topic: SpringTopic) -> str:
+    first_question = topic.questions[0] if topic.questions else f"{topic.title}를 설명해주세요."
+    return f"""### Q. {first_question}
+
+{topic.answer}
+
+### Q. 실무에서 {topic.title}을 적용할 때 무엇을 주의해야 하나요?
+
+{build_spring_practical_answer(topic)}"""
+
+
+def build_spring_practical_answer(topic: SpringTopic) -> str:
+    cautions = build_spring_cautions(topic)
+    return " ".join(cautions[:2])
+
+
+def build_spring_related_concepts(topic: SpringTopic) -> list[tuple[str, str]]:
+    rows = list(SPRING_RELATED.get(topic.key, ()))
+    if rows:
+        return rows
+    return [
+        ("테스트", "기능이 의도대로 동작하는지 검증하기 위해 필요합니다."),
+        ("예외 처리", "실패 흐름을 안정적으로 운영하기 위해 필요합니다."),
+        ("로깅", "운영 환경에서 문제를 추적하기 위해 필요합니다."),
+    ]
+
+
+def build_spring_detailed_explanation(topic: SpringTopic) -> str:
+    details = "\n\n".join(f"- {line}" for line in topic.details)
+    comparison = ""
+    if topic.key == "spring-ioc-di":
+        comparison = """
+
+### DI 방식 비교
+
+| 주입 방식 | 특징 | 실무 판단 |
+| --- | --- | --- |
+| 생성자 주입 | 생성 시점에 의존성을 전달합니다. | 필수 의존성에 권장합니다. |
+| setter 주입 | 객체 생성 후 의존성을 변경할 수 있습니다. | 선택 의존성에 제한적으로 사용합니다. |
+| 필드 주입 | 필드에 직접 주입합니다. | 테스트와 불변성 측면에서 비권장합니다. |"""
+    if topic.key == "spring-transaction":
+        comparison = """
+
+### 트랜잭션 적용 시 확인할 점
+
+| 확인 항목 | 이유 |
+| --- | --- |
+| 프록시 호출 여부 | self-invocation에서는 트랜잭션이 적용되지 않을 수 있습니다. |
+| 롤백 예외 | checked exception은 기본 rollback 대상이 아닙니다. |
+| 트랜잭션 범위 | 외부 API 호출을 오래 포함하면 락과 커넥션 점유가 길어질 수 있습니다. |"""
+    return f"{details}{comparison}".strip()
+
+
+def build_spring_topic_section(topic: SpringTopic) -> str:
+    operation = build_spring_operation(topic)
+    components = build_spring_components(topic)
+    cautions = build_spring_cautions(topic)
+    code_examples = build_spring_code_examples(topic)
+    tail_questions = build_spring_tail_questions(topic)
+    related = build_spring_related_concepts(topic)
+    petclinic = f"\n- {topic.petclinic_hint}" if topic.petclinic_hint else ""
+
+    return f"""# 오늘의 Spring 백엔드 지식
+
+## 주제
 
 {topic.title}
 
@@ -1134,22 +1613,42 @@ def build_spring_topic_section(topic: SpringTopic) -> str:
 
 {bullet_lines(topic.summary)}
 
-## Spring 조금 더 자세히
+## 동작 원리
 
-{bullet_lines(topic.details)}
+{operation}
 
-## Spring 구현 체크리스트
+## 내부 구성 요소
 
-{bullet_lines(topic.implementation)}
+{markdown_table(("구성 요소", "역할"), components)}
+
+## 실무 구현 포인트
+
+{markdown_table(("상황", "권장 방식", "이유"), build_spring_implementation_rows(topic))}
+
+## 주의사항
+
+{bullet_lines(cautions)}
+
+## 코드 예시
+
 {code_examples}
-{petclinic}
-## Spring 면접 질문
 
-{bullet_lines(topic.questions)}
+## 자주 나오는 꼬리 질문
+
+{markdown_table(("질문", "핵심 답변 방향"), tail_questions)}
 
 ## Spring 면접 답변 예시
 
-{topic.answer}
+{build_spring_answer_examples(topic)}
+
+## 함께 알아야 하는 개념
+
+{markdown_table(("개념", "함께 알아야 하는 이유"), related)}
+{petclinic}
+
+## 상세 설명
+
+{build_spring_detailed_explanation(topic)}
 """
 
 
@@ -1199,13 +1698,156 @@ def clean_body_markdown(item: StudyItem) -> str:
     return text
 
 
+def extract_code_blocks(text: str) -> list[tuple[str, str]]:
+    blocks: list[tuple[str, str]] = []
+    for match in re.finditer(r"```([a-zA-Z0-9_+-]*)\n(.*?)```", text, flags=re.DOTALL):
+        language = match.group(1).strip() or "text"
+        code = match.group(2).strip()
+        if code:
+            blocks.append((language, code))
+    return blocks
+
+
+def build_cs_practical_section(item: StudyItem) -> str:
+    lowered = f"{item.title} {strip_markdown(item.body)}".lower()
+    if "hash" in lowered or "해시" in lowered:
+        lines = [
+            "`HashMap`은 단건 조회, 집계, 중복 제거, 캐시성 데이터 관리에 자주 사용됩니다.",
+            "`HashSet`은 중복 제거에 적합하고 내부적으로 해시 기반 구조를 사용합니다.",
+            "직접 만든 객체를 key로 사용할 때는 `equals()`와 `hashCode()`를 일관되게 구현해야 합니다.",
+            "멀티스레드 환경에서 공유 map이 필요하면 `ConcurrentHashMap` 같은 동시성 컬렉션을 검토합니다.",
+        ]
+    elif "index" in lowered or "인덱스" in lowered:
+        lines = [
+            "조회 조건과 정렬 조건을 기준으로 인덱스 설계를 검토합니다.",
+            "인덱스는 조회를 빠르게 만들 수 있지만 쓰기 비용과 저장 공간을 증가시킬 수 있습니다.",
+            "`EXPLAIN`으로 실제 실행 계획을 확인하고 인덱스를 타는지 검증합니다.",
+        ]
+    elif "transaction" in lowered or "트랜잭션" in lowered:
+        lines = [
+            "여러 데이터 변경이 하나의 작업 단위로 성공하거나 실패해야 할 때 사용합니다.",
+            "격리 수준에 따라 동시성 문제와 성능 비용이 달라집니다.",
+            "Spring에서는 보통 Service 계층에 트랜잭션 경계를 둡니다.",
+        ]
+    else:
+        lines = [
+            f"`{item.category}` 영역에서 {item.title}가 실제 시스템의 성능, 안정성, 유지보수성에 어떤 영향을 주는지 연결해 봅니다.",
+            "비슷한 개념과 비교하면서 언제 이 개념을 선택하고 언제 다른 대안을 선택할지 정리합니다.",
+            "운영 환경에서는 데이터 크기, 장애 상황, 보안 요구사항, 성능 병목을 함께 고려합니다.",
+        ]
+    return "\n".join(f"- {line}" for line in lines)
+
+
+def build_cs_code_example(item: StudyItem) -> str:
+    blocks = extract_code_blocks(item.body)
+    if blocks:
+        language, code = blocks[0]
+        code_lines = code.splitlines()
+        if len(code_lines) > 40:
+            code = "\n".join(code_lines[:40]).rstrip() + "\n// ..."
+        return f"```{language}\n{code}\n```"
+
+    lowered = f"{item.title} {strip_markdown(item.body)}".lower()
+    if "hash" in lowered or "해시" in lowered:
+        return """```java
+Map<String, Integer> countByName = new HashMap<>();
+
+countByName.put("kim", 1);
+countByName.put("lee", 2);
+
+System.out.println(countByName.get("kim"));
+```"""
+    if "greedy" in lowered or "그리디" in lowered or "탐욕" in lowered:
+        return """```java
+meetings.sort(Comparator.comparingInt(Meeting::endTime));
+
+int count = 0;
+int lastEndTime = 0;
+for (Meeting meeting : meetings) {
+    if (meeting.startTime() >= lastEndTime) {
+        count++;
+        lastEndTime = meeting.endTime();
+    }
+}
+```"""
+    return "이 주제는 코드보다 개념의 동작 원리와 비교 기준을 중심으로 정리합니다."
+
+
+def build_cs_detailed_explanation(item: StudyItem, body: str) -> str:
+    lowered = f"{item.title} {strip_markdown(item.body)}".lower()
+    if is_hash_topic(item):
+        return """해시는 데이터를 고정된 크기의 값으로 변환하는 방식입니다. 같은 입력은 항상 같은 해시값을 만들고, 좋은 해시 함수는 입력이 조금만 달라져도 해시값이 크게 달라지도록 설계됩니다.
+
+해시는 크게 두 맥락에서 자주 등장합니다. 하나는 자료구조 관점의 해시 테이블이고, 다른 하나는 보안 관점의 암호학적 해시입니다.
+
+| 구분 | 자료구조용 해시 | 보안용 해시 |
+| --- | --- | --- |
+| 주요 목적 | 빠른 조회와 저장 위치 계산 | 무결성 검증, 원문 추측 방지 |
+| 중요한 성질 | 빠른 계산, 균등 분포 | 역상 저항성, 충돌 저항성, 눈사태 효과 |
+| 예시 | `HashMap`, `HashSet` | SHA-256, bcrypt, Argon2 |
+| 주의점 | 충돌이 많으면 성능 저하 | 비밀번호에는 단순 해시만 사용하면 위험 |
+
+### 해시 충돌 해결
+
+| 구분 | 체이닝 | 개방 주소법 |
+| --- | --- | --- |
+| 저장 방식 | 같은 버킷에 여러 데이터를 연결 | 테이블 내부의 다른 빈 버킷을 탐색 |
+| 장점 | 구현이 직관적이고 삭제가 비교적 쉬움 | 별도 연결 구조가 필요 없음 |
+| 단점 | 특정 버킷에 몰리면 탐색 비용 증가 | 테이블이 찰수록 탐사 비용 증가 |
+| 예시 | Java `HashMap`의 기본 충돌 처리 방식 | 선형 탐사, 제곱 탐사, 이중 해싱 |
+
+### Load Factor와 재해싱
+
+```text
+Load Factor = 저장된 엔트리 수 / 버킷 배열 크기
+```
+
+Load Factor가 높아질수록 빈 버킷이 줄어들고 충돌 가능성이 커집니다. 충돌이 많아지면 해시 테이블의 평균 `O(1)` 성능을 기대하기 어려워지므로, 구현체는 일정 임계값을 넘었을 때 버킷 배열을 확장합니다.
+
+재해싱은 기존 엔트리를 확장된 버킷 배열 기준으로 다시 배치하는 과정입니다. 버킷 수가 달라지면 같은 key라도 계산되는 인덱스가 달라질 수 있기 때문입니다.
+
+### 함께 알아야 하는 개념
+
+| 개념 | 이유 |
+| --- | --- |
+| 해시 함수 | key를 버킷 위치로 변환하는 핵심입니다. |
+| 해시 충돌 | 서로 다른 key가 같은 버킷에 매핑되는 상황입니다. |
+| 체이닝 | 같은 버킷에 여러 엔트리를 연결해 충돌을 처리합니다. |
+| 개방 주소법 | 충돌 시 테이블 내부의 다른 빈 버킷을 찾습니다. |
+| Load Factor | 테이블이 얼마나 찼는지 나타내며 resize 기준이 됩니다. |
+| `equals()` / `hashCode()` | Java 해시 컬렉션의 key 동등성 판단에 필요합니다. |
+
+면접에서는 해시를 "고유한 값으로 바꾼다"라고만 말하면 위험합니다. 실제로는 충돌 가능성이 존재하므로, 해시는 데이터를 빠르게 찾기 위한 인덱싱 도구이며 충돌을 어떻게 처리하느냐가 성능의 핵심이라고 설명하는 편이 더 정확합니다."""
+
+    sections: list[str] = [body]
+    if "hash" in lowered or "해시" in lowered:
+        sections.append(
+            """### 함께 알아야 하는 개념
+
+| 개념 | 이유 |
+| --- | --- |
+| 해시 함수 | key를 버킷 위치로 변환하는 핵심입니다. |
+| 해시 충돌 | 서로 다른 key가 같은 버킷에 매핑되는 상황입니다. |
+| 체이닝 | 같은 버킷에 여러 엔트리를 연결해 충돌을 처리합니다. |
+| 개방 주소법 | 충돌 시 테이블 내부의 다른 빈 버킷을 찾습니다. |
+| Load Factor | 테이블이 얼마나 찼는지 나타내며 resize 기준이 됩니다. |
+| `equals()` / `hashCode()` | Java 해시 컬렉션의 key 동등성 판단에 필요합니다. |"""
+        )
+    return "\n\n".join(section.strip() for section in sections if section.strip())
+
+
 def build_note(item: StudyItem, spring_topic: SpringTopic, today: date) -> str:
     body = clean_body_markdown(item)
+    title = display_title(item)
     return f"""# {today.isoformat()} 1일 2CS/면접 지식
 
-## 오늘의 CS 지식
+---
 
-{item.title}
+# 오늘의 CS 지식
+
+## 주제
+
+{title}
 
 ## 카테고리
 
@@ -1215,21 +1857,29 @@ def build_note(item: StudyItem, spring_topic: SpringTopic, today: date) -> str:
 
 {build_summary_section(item)}
 
-## 조금 더 자세히
-
-{body}
-
 ## 면접 포인트
 
 {build_interview_points(item)}
 
-## 연관되어 자주 나오는 면접 질문
+## 자주 나오는 면접 질문
 
 {build_related_questions(item)}
 
 ## 면접 답변 예시
 
 {build_interview_answer_examples(item)}
+
+## 실무 관점
+
+{build_cs_practical_section(item)}
+
+## 코드 예시
+
+{build_cs_code_example(item)}
+
+## 상세 설명
+
+{build_cs_detailed_explanation(item, body)}
 
 ---
 

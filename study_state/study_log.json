@@ -29,5 +29,16 @@
     "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_greedy.md",
     "spring_key": "spring-layered-architecture",
     "spring_title": "Controller-Service-Repository 계층 분리"
+  },
+  {
+    "date": "2026-06-19",
+    "key": "b85cc4ea9c86e5e7",
+    "title": "Hash란",
+    "category": "algorithm",
+    "source": "references/sources/devsquad-2023-cs-study/Algorithm/algorithm_hash.md",
+    "note": "daily_notes/yonghun-cs-interview-2026-06-19.md",
+    "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_hash.md",
+    "spring_key": "spring-ioc-di",
+    "spring_title": "IoC와 DI, 생성자 주입"
   }
 ]
