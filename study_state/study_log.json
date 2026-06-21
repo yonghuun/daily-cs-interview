@@ -40,5 +40,16 @@
     "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_hash.md",
     "spring_key": "spring-ioc-di",
     "spring_title": "IoC와 DI, 생성자 주입"
+  },
+  {
+    "date": "2026-06-21",
+    "key": "6b7f0693d7f0bb6a",
+    "title": "이진 트리(Binary Tree)",
+    "category": "algorithm",
+    "source": "references/sources/devsquad-2023-cs-study/Algorithm/algorithm_heap.md",
+    "note": "daily_notes/yonghun-cs-interview-2026-06-21.md",
+    "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_heap.md",
+    "spring_key": "spring-mvc-dispatcher-servlet",
+    "spring_title": "Spring MVC와 DispatcherServlet"
   }
 ]

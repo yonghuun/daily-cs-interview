@@ -1,5 +1,6 @@
 [
   "spring-rest-api-basics",
   "spring-layered-architecture",
-  "spring-ioc-di"
+  "spring-ioc-di",
+  "spring-mvc-dispatcher-servlet"
 ]
