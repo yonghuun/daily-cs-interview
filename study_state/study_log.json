@@ -51,5 +51,27 @@
     "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_heap.md",
     "spring_key": "spring-mvc-dispatcher-servlet",
     "spring_title": "Spring MVC와 DispatcherServlet"
+  },
+  {
+    "date": "2026-06-22",
+    "key": "76a6da49018e105f",
+    "title": "연결 리스트",
+    "category": "algorithm",
+    "source": "references/sources/devsquad-2023-cs-study/Algorithm/algorithm_linkedlist.md",
+    "note": "daily_notes/yonghun-cs-interview-2026-06-22.md",
+    "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_linkedlist.md",
+    "spring_key": "spring-validation-exception",
+    "spring_title": "요청 검증과 예외 응답 설계"
+  },
+  {
+    "date": "2026-06-23",
+    "key": "2d1e2f542e75cfd8",
+    "title": "[ 이진 탐색 트리(BST,Binary Search Tree)의 단점 ]",
+    "category": "algorithm",
+    "source": "references/sources/devsquad-2023-cs-study/Algorithm/algorithm_red_black_tree.md",
+    "note": "daily_notes/yonghun-cs-interview-2026-06-23.md",
+    "github_url": "https://github.com/devSquad-study/2023-CS-Study/blob/main/Algorithm/algorithm_red_black_tree.md",
+    "spring_key": "spring-transaction",
+    "spring_title": "Spring 트랜잭션과 @Transactional"
   }
 ]
